@@ -12,20 +12,46 @@ export fn update() void {
     }
 }
 
+// https://coolors.co/palette/ffbe0b-fb5607-ff006e-8338ec-3a86ff
+// https://rgbcolorpicker.com/565
+const white: cart.DisplayColor = .{ .r = 31, .g = 63, .b = 31 };
+const yellow: cart.DisplayColor = .{ .r = 31, .g = 47, .b = 1 };
+const orange: cart.DisplayColor = .{ .r = 31, .g = 21, .b = 1 };
+const pink: cart.DisplayColor = .{ .r = 31, .g = 0, .b = 13 };
+const purple: cart.DisplayColor = .{ .r = 16, .g = 14, .b = 29 };
+const blue: cart.DisplayColor = .{ .r = 7, .g = 33, .b = 31 };
+
+//    .{ .r = 31, .g = 47, .b =  1 }, // 1: yellow
+//    .{ .r = 31, .g = 21, .b =  1 }, // 2: orange
+//    .{ .r = 31, .g =  0, .b = 13 }, // 3: pink
+//    .{ .r = 16, .g = 14, .b = 29 }, // 4: purple
+//    .{ .r =  7, .g = 33, .b = 31 }, // 5: blue
+
 const lines = &[_][]const u8{
-    "Auguste Rame",
-    "~AOE4 Player",
+    "Pietro Peterlongo",
+    "pietroppeter",
 
     "",
 
-    "aurame",
-    "SuperAuguste",
+    " (..) ",
+    "((()))",
 
     "",
 
     "SYCL24",
-    "Press START",
+    "A to turn on LEDS",
 };
+const linesColor = [_]cart.DisplayColor{
+    yellow,
+    pink,
+    white,
+    purple,
+    purple,
+    white,
+    blue,
+    orange,
+};
+
 const spacing = (cart.font_height * 4 / 3);
 
 var ticks: u8 = 0;
@@ -39,7 +65,19 @@ fn scene_intro() void {
         .b = 0,
     });
 
-    if (ticks / 128 == 0) {
+    const y_start = (cart.screen_height - (cart.font_height + spacing * (lines.len - 1))) / 2;
+
+    // Write it out!
+    for (lines, 0..) |line, i| {
+        cart.text(.{
+            .text_color = linesColor[i],
+            .str = line,
+            .x = @intCast((cart.screen_width - cart.font_width * line.len) / 2),
+            .y = @intCast(y_start + spacing * i),
+        });
+    }
+
+    if (cart.controls.a) {
         // Make the neopixel 24-bit color LEDs a nice Zig orange
         @memset(cart.neopixels, .{
             .r = 247,
@@ -47,23 +85,8 @@ fn scene_intro() void {
             .b = 29,
         });
     }
-
-    const y_start = (cart.screen_height - (cart.font_height + spacing * (lines.len - 1))) / 2;
-
-    // Write it out!
-    for (lines, 0..) |line, i| {
-        cart.text(.{
-            .text_color = .{ .r = 31, .g = 63, .b = 31 },
-            .str = line,
-            .x = @intCast((cart.screen_width - cart.font_width * line.len) / 2),
-            .y = @intCast(y_start + spacing * i),
-        });
-    }
-
-    if (ticks == 0) cart.red_led.* = !cart.red_led.*;
-    if (cart.controls.start) scene = .game;
-
-    ticks +%= 4;
+    if (cart.controls.b) cart.red_led.* = !cart.red_led.*;
+    //if (cart.controls.start) scene = .game;
 }
 
 const Player = enum(u8) { x = 0, o = 1, none = std.math.maxInt(u8) };
